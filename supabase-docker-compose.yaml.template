@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  supabase-db:
+    image: supabase/postgres:15.1.0.117
+    container_name: supabase-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - supabase_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  supabase-studio:
+    image: supabase/studio:20240205-4b3b9d1
+    container_name: supabase-studio
+    restart: unless-stopped
+    environment:
+      - STUDIO_PG_META_URL=http://meta:8080
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - DEFAULT_ORGANIZATION=Default Organization
+      - DEFAULT_PROJECT=Default Project
+      - SUPABASE_URL=http://kong:8000
+      - SUPABASE_PUBLIC_URL=http://kong:8000
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - supabase-db
+    networks:
+      - app-network
+
+volumes:
+  supabase_data:
+
+networks:
+  app-network:
+    external: true 

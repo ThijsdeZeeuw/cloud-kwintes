@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+    restart: unless-stopped
+    environment:
+      - OLLAMA_API_BASE_URL=http://ollama:11434/api
+      - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY}
+      - WEBUI_USERNAME=${OPENWEBUI_USERNAME}
+      - WEBUI_PASSWORD=${OPENWEBUI_PASSWORD}
+    depends_on:
+      - ollama
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true 
