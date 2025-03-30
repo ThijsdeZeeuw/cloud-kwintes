@@ -114,6 +114,53 @@ docker compose -f openwebui-docker-compose.yaml logs
 docker compose -f supabase-docker-compose.yaml logs
 ```
 
+## Uninstallation
+
+To completely remove all services and start fresh, follow these steps:
+
+1. Stop and remove all containers:
+```bash
+docker compose -f n8n-docker-compose.yaml down
+docker compose -f flowise-docker-compose.yaml down
+docker compose -f ollama-docker-compose.yaml down
+docker compose -f openwebui-docker-compose.yaml down
+docker compose -f supabase-docker-compose.yaml down
+```
+
+2. Remove all Docker volumes:
+```bash
+docker volume rm n8n_data caddy_data caddy_config ollama_data openwebui_data openwebui_config supabase_data
+```
+
+3. Remove all configuration files:
+```bash
+rm -f n8n-docker-compose.yaml flowise-docker-compose.yaml ollama-docker-compose.yaml openwebui-docker-compose.yaml supabase-docker-compose.yaml .env Caddyfile
+rm -f setup-files/passwords.txt
+```
+
+4. Remove service directories:
+```bash
+sudo rm -rf /opt/n8n /opt/flowise /opt/ollama /opt/openwebui /opt/supabase
+```
+
+5. Remove the n8n user (optional):
+```bash
+sudo userdel -r n8n
+```
+
+6. Remove the Docker network:
+```bash
+docker network rm app-network
+```
+
+7. Remove the cloud-kwintes directory and all its contents:
+```bash
+cd ..  # Move up one directory level
+rm -rf cloud-kwintes
+```
+
+After completing these steps, your system will be clean and ready for a fresh installation.
+
 ## Security
 
 - All services are accessible only via HTTPS with automatically renewed Let's Encrypt certificates
