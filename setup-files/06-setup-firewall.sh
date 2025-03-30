@@ -18,6 +18,18 @@ if command -v ufw &> /dev/null; then
     echo "ERROR: Failed to open port 443"
     exit 1
   fi
+
+  sudo ufw allow 11434
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to open port 11434"
+    exit 1
+  fi
+
+  sudo ufw allow 5432
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to open port 5432"
+    exit 1
+  fi
   
   # Check if ufw is active
   sudo ufw status | grep -q "Status: active"
@@ -30,7 +42,7 @@ if command -v ufw &> /dev/null; then
     fi
   fi
   
-  echo "Ports 80 and 443 are open in the firewall"
+  echo "Ports 80, 443, 11434, and 5432 are open in the firewall"
 else
   echo "UFW is not installed. Installing..."
   sudo apt-get install -y ufw
@@ -51,6 +63,18 @@ else
     echo "ERROR: Failed to open port 443"
     exit 1
   fi
+
+  sudo ufw allow 11434
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to open port 11434"
+    exit 1
+  fi
+
+  sudo ufw allow 5432
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to open port 5432"
+    exit 1
+  fi
   
   # Activate firewall
   sudo ufw --force enable
@@ -59,7 +83,7 @@ else
     exit 1
   fi
   
-  echo "Firewall installed and ports 80, 443 are open"
+  echo "Firewall installed and ports 80, 443, 11434, and 5432 are open"
 fi
 
 echo "✅ Firewall successfully configured"

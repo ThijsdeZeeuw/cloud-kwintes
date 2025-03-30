@@ -26,7 +26,7 @@ The system is configured to work with your domain name and automatically obtains
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/miolamio/cloud-local-n8n-flowise.git && cd cloud-local-n8n-flowise
+   git clone https://github.com/ThijsdeZeeuw/cloud-kwintes.git && cd cloud-kwintes
    ```
 
 2. Make the script executable:

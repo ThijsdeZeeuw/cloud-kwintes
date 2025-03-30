@@ -20,7 +20,7 @@ show_progress() {
 
 # Main installation function
 main() {
-  show_progress "🚀 Starting installation of n8n, Flowise, and Caddy"
+  show_progress "🚀 Starting installation of n8n, Flowise, Ollama, OpenWebUI, Supabase, and Caddy"
   
   # Check administrator rights
   if [ "$EUID" -ne 0 ]; then
@@ -99,6 +99,8 @@ main() {
   # Load generated passwords
   N8N_PASSWORD=""
   FLOWISE_PASSWORD=""
+  OPENWEBUI_PASSWORD=""
+  SUPABASE_DB_PASSWORD=""
   if [ -f "./setup-files/passwords.txt" ]; then
     source ./setup-files/passwords.txt
   fi
@@ -108,6 +110,9 @@ main() {
   
   echo "n8n is available at: https://n8n.${DOMAIN_NAME}"
   echo "Flowise is available at: https://flowise.${DOMAIN_NAME}"
+  echo "Ollama is available at: https://ollama.${DOMAIN_NAME}"
+  echo "OpenWebUI is available at: https://openwebui.${DOMAIN_NAME}"
+  echo "Supabase is available at: https://supabase.${DOMAIN_NAME}"
   echo ""
   echo "Login credentials for n8n:"
   echo "Email: ${USER_EMAIL}"
@@ -117,18 +122,31 @@ main() {
   echo "Username: admin"
   echo "Password: ${FLOWISE_PASSWORD:-<check the .env file>}"
   echo ""
+  echo "Login credentials for OpenWebUI:"
+  echo "Username: admin"
+  echo "Password: ${OPENWEBUI_PASSWORD:-<check the .env file>}"
+  echo ""
+  echo "Login credentials for Supabase:"
+  echo "Database Password: ${SUPABASE_DB_PASSWORD:-<check the .env file>}"
+  echo ""
   echo "Please note that for the domain name to work, you need to configure DNS records"
   echo "pointing to the IP address of this server."
   echo ""
   echo "To edit the configuration, use the following files:"
   echo "- n8n-docker-compose.yaml (n8n and Caddy configuration)"
   echo "- flowise-docker-compose.yaml (Flowise configuration)"
+  echo "- ollama-docker-compose.yaml (Ollama configuration)"
+  echo "- openwebui-docker-compose.yaml (OpenWebUI configuration)"
+  echo "- supabase-docker-compose.yaml (Supabase configuration)"
   echo "- .env (environment variables for all services)"
   echo "- Caddyfile (reverse proxy settings)"
   echo ""
   echo "To restart services, execute the commands:"
   echo "docker compose -f n8n-docker-compose.yaml restart"
   echo "docker compose -f flowise-docker-compose.yaml restart"
+  echo "docker compose -f ollama-docker-compose.yaml restart"
+  echo "docker compose -f openwebui-docker-compose.yaml restart"
+  echo "docker compose -f supabase-docker-compose.yaml restart"
 }
 
 # Run main function

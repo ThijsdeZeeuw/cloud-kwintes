@@ -64,6 +64,24 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+sudo mkdir -p /opt/ollama
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to create directory /opt/ollama"
+  exit 1
+fi
+
+sudo mkdir -p /opt/openwebui
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to create directory /opt/openwebui"
+  exit 1
+fi
+
+sudo mkdir -p /opt/supabase
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to create directory /opt/supabase"
+  exit 1
+fi
+
 # Setting permissions
 sudo chown -R n8n:n8n /opt/n8n
 if [ $? -ne 0 ]; then
@@ -74,6 +92,24 @@ fi
 sudo chown -R n8n:n8n /opt/flowise
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to change owner of directory /opt/flowise"
+  exit 1
+fi
+
+sudo chown -R n8n:n8n /opt/ollama
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to change owner of directory /opt/ollama"
+  exit 1
+fi
+
+sudo chown -R n8n:n8n /opt/openwebui
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to change owner of directory /opt/openwebui"
+  exit 1
+fi
+
+sudo chown -R n8n:n8n /opt/supabase
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to change owner of directory /opt/supabase"
   exit 1
 fi
 
@@ -88,6 +124,18 @@ fi
 sudo docker volume create caddy_data
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to create Docker volume caddy_data"
+  exit 1
+fi
+
+sudo docker volume create ollama_data
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to create Docker volume ollama_data"
+  exit 1
+fi
+
+sudo docker volume create supabase_data
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to create Docker volume supabase_data"
   exit 1
 fi
 
