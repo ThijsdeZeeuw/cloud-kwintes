@@ -2,8 +2,6 @@
 # Purpose: Provides a web-based interface for interacting with Ollama
 # This configuration sets up a secure, user-authenticated interface for managing AI models
 
-version: '3'
-
 services:
   openwebui:
     # Main OpenWebUI service configuration
@@ -40,7 +38,7 @@ services:
     # Health Check
     # Purpose: Ensure the web interface is running and responding
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

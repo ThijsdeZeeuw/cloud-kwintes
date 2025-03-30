@@ -27,6 +27,8 @@ The system is configured to work with your domain name and automatically obtains
 1. Clone the repository:
    ```bash
    git clone https://github.com/ThijsdeZeeuw/cloud-kwintes.git && cd cloud-kwintes
+   chmod +x setup.sh
+   ./setup.sh
    ```
 
 2. Make the script executable:
@@ -42,6 +44,29 @@ The system is configured to work with your domain name and automatically obtains
 4. Follow the instructions in the terminal:
    - Enter your domain name (e.g., example.com)
    - Enter your email (will be used for n8n login and Let's Encrypt)
+
+## Refreshing Files
+
+To update your local files with the latest version from the repository while preserving your local configurations:
+
+1. Make the refresh script executable:
+   ```bash
+   chmod +x refresh.sh
+   ```
+
+2. Run the refresh script:
+   ```bash
+   ./refresh.sh
+   ```
+
+The script will:
+- Create a backup of your important configuration files
+- Check for any local changes
+- Fetch and apply the latest changes from the repository
+- Restore your backed-up configuration files
+- Set proper execution permissions
+
+If you have local changes, the script will ask for confirmation before proceeding. You can always restore from the backup directory if needed.
 
 ## What the installation script does
 
@@ -139,44 +164,4 @@ rm -f setup-files/passwords.txt
 ```
 
 4. Remove service directories:
-```bash
-sudo rm -rf /opt/n8n /opt/flowise /opt/ollama /opt/openwebui /opt/supabase
 ```
-
-5. Remove the n8n user (optional):
-```bash
-sudo userdel -r n8n
-```
-
-6. Remove the Docker network:
-```bash
-docker network rm app-network
-```
-
-7. Remove the cloud-kwintes directory and all its contents:
-```bash
-cd ..  # Move up one directory level
-rm -rf cloud-kwintes
-```
-
-After completing these steps, your system will be clean and ready for a fresh installation.
-
-## Security
-
-- All services are accessible only via HTTPS with automatically renewed Let's Encrypt certificates
-- Random passwords are created for n8n, Flowise, OpenWebUI, and Supabase
-- Users are created with minimal necessary privileges
-
-## Troubleshooting
-
-- Check your domain's DNS records to ensure they point to the correct IP address
-- Verify that ports 80, 443, 11434, and 5432 are open on your server
-- View container logs to detect errors
-
-## License
-
-This project is distributed under the MIT License.
-
-## Author
-
-@codegeek

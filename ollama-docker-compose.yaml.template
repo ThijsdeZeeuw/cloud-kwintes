@@ -36,7 +36,7 @@ services:
     # Health Check
     # Purpose: Ensure the Ollama service is running and responding
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:11434/api/version || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,13 +45,7 @@ services:
     # Startup Command
     # Purpose: Start Ollama server and pre-download required models
     command: >
-      sh -c "mkdir -p /models &&
-      ollama serve &
-      sleep 5 &&
-      ollama pull llama2 &&
-      ollama pull neural-chat &&
-      ollama pull starling-lm &&
-      tail -f /dev/null"
+      sh -c "mkdir -p /root/.ollama && ollama serve"
 
 # Volume Definitions
 # Purpose: Define persistent storage for Ollama data
