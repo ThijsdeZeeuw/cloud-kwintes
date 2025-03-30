@@ -18,6 +18,33 @@ show_progress() {
   echo ""
 }
 
+# Function to validate domain name
+validate_domain() {
+  local domain=$1
+  if [[ ! "$domain" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$ ]]; then
+    return 1
+  fi
+  return 0
+}
+
+# Function to validate email
+validate_email() {
+  local email=$1
+  if [[ ! "$email" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+    return 1
+  fi
+  return 0
+}
+
+# Function to validate timezone
+validate_timezone() {
+  local timezone=$1
+  if ! timedatectl list-timezones | grep -q "^$timezone$"; then
+    return 1
+  fi
+  return 0
+}
+
 # Main installation function
 main() {
   show_progress "🚀 Starting installation of n8n, Flowise, Ollama, OpenWebUI, Supabase, and Caddy"
@@ -34,23 +61,36 @@ main() {
   echo "For installation, you need to specify a domain name and email address."
   
   # Request domain name
-  read -p "Enter your domain name (e.g., example.com): " DOMAIN_NAME
-  while [[ -z "$DOMAIN_NAME" ]]; do
-    echo "Domain name cannot be empty"
+  while true; do
     read -p "Enter your domain name (e.g., example.com): " DOMAIN_NAME
+    if validate_domain "$DOMAIN_NAME"; then
+      break
+    else
+      echo "Invalid domain name format. Please enter a valid domain name."
+    fi
   done
   
   # Request email address
-  read -p "Enter your email (will be used for n8n login): " USER_EMAIL
-  while [[ ! "$USER_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; do
-    echo "Enter a valid email address"
+  while true; do
     read -p "Enter your email (will be used for n8n login): " USER_EMAIL
+    if validate_email "$USER_EMAIL"; then
+      break
+    else
+      echo "Invalid email format. Please enter a valid email address."
+    fi
   done
   
   # Request timezone
   DEFAULT_TIMEZONE=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "UTC")
-  read -p "Enter your timezone (default: $DEFAULT_TIMEZONE): " GENERIC_TIMEZONE
-  GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-$DEFAULT_TIMEZONE}
+  while true; do
+    read -p "Enter your timezone (default: $DEFAULT_TIMEZONE): " GENERIC_TIMEZONE
+    GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-$DEFAULT_TIMEZONE}
+    if validate_timezone "$GENERIC_TIMEZONE"; then
+      break
+    else
+      echo "Invalid timezone. Please enter a valid timezone."
+    fi
+  done
   
   # Create setup-files directory if it doesn't exist
   if [ ! -d "setup-files" ]; then
@@ -60,6 +100,24 @@ main() {
   
   # Set execution permissions for all scripts
   chmod +x setup-files/*.sh 2>/dev/null || true
+  
+  # Verify all required scripts exist
+  required_scripts=(
+    "01-update-system.sh"
+    "02-install-docker.sh"
+    "03-setup-directories.sh"
+    "04-generate-secrets.sh"
+    "05-create-templates.sh"
+    "06-setup-firewall.sh"
+    "07-start-services.sh"
+  )
+  
+  for script in "${required_scripts[@]}"; do
+    if [ ! -f "setup-files/$script" ]; then
+      echo "❌ Required script $script not found"
+      exit 1
+    fi
+  done
   
   # Step 1: System update
   show_progress "Step 1/7: System update"
@@ -73,7 +131,7 @@ main() {
   
   # Step 3: Directory setup
   show_progress "Step 3/7: Directory setup"
-  ./setup-files/03-setup-directories.sh
+  ./setup-files/03-setup-directories.sh "$USER_EMAIL" "$DOMAIN_NAME" "$GENERIC_TIMEZONE"
   check_success "directory setup"
   
   # Step 4: Secret key generation

@@ -24,7 +24,7 @@ services:
     # Purpose: Persist model data and allow custom model uploads
     volumes:
       - ollama_data:/root/.ollama  # Store downloaded models and settings
-      - ./models:/models  # Allow custom model uploads
+      - ./models:/models:ro  # Allow custom model uploads (read-only)
     
     # Network Configuration
     # Purpose: Expose Ollama API and connect to other services
@@ -36,15 +36,17 @@ services:
     # Health Check
     # Purpose: Ensure the Ollama service is running and responding
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/version || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:11434/api/version || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s  # Allow extra time for initial startup
     
     # Startup Command
     # Purpose: Start Ollama server and pre-download required models
     command: >
-      sh -c "ollama serve &
+      sh -c "mkdir -p /models &&
+      ollama serve &
       sleep 5 &&
       ollama pull llama2 &&
       ollama pull neural-chat &&

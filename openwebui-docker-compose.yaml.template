@@ -40,11 +40,11 @@ services:
     # Health Check
     # Purpose: Ensure the web interface is running and responding
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s  # Allow extra time for initial startup
+      start_period: 30s  # Allow extra time for initial startup
     
     # Service Dependencies
     # Purpose: Ensure Ollama is running before starting OpenWebUI
@@ -56,12 +56,15 @@ services:
     # Purpose: Persist user settings and chat history
     volumes:
       - openwebui_data:/app/backend/data  # Store user data and settings
+      - openwebui_config:/app/backend/config  # Store configuration files
 
 # Volume Definitions
 # Purpose: Define persistent storage for OpenWebUI data
 volumes:
   openwebui_data:
     name: openwebui_data
+  openwebui_config:
+    name: openwebui_config
 
 # Network Definitions
 # Purpose: Connect to the shared application network
