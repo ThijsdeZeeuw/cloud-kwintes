@@ -80,7 +80,7 @@ fi
 
 # Generate Supabase Credentials
 # Purpose: Create database password and API keys for Supabase
-SUPABASE_DB_PASSWORD=$(generate_safe_password 16)
+SUPABASE_DB_PASSWORD=$(generate_safe_password 32)
 if [ -z "$SUPABASE_DB_PASSWORD" ]; then
   echo "ERROR: Failed to generate password for Supabase DB"
   exit 1
@@ -92,6 +92,8 @@ if [ -z "$SUPABASE_JWT_SECRET" ]; then
   exit 1
 fi
 
+# Generate Supabase API Keys
+# Purpose: Create anon and service role keys for Supabase
 SUPABASE_ANON_KEY=$(generate_random_string 32)
 if [ -z "$SUPABASE_ANON_KEY" ]; then
   echo "ERROR: Failed to generate anon key for Supabase"
@@ -110,6 +112,14 @@ DASHBOARD_USERNAME="admin"
 DASHBOARD_PASSWORD=$(generate_safe_password 16)
 if [ -z "$DASHBOARD_PASSWORD" ]; then
   echo "ERROR: Failed to generate password for Supabase dashboard"
+  exit 1
+fi
+
+# Generate Supabase Pooler Tenant ID
+# Purpose: Create a unique tenant ID for the connection pooler
+POOLER_TENANT_ID=$(shuf -i 1000-9999 -n 1)
+if [ -z "$POOLER_TENANT_ID" ]; then
+  echo "ERROR: Failed to generate pooler tenant ID"
   exit 1
 fi
 
@@ -155,6 +165,7 @@ SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
 DASHBOARD_USERNAME=$DASHBOARD_USERNAME
 DASHBOARD_PASSWORD=$DASHBOARD_PASSWORD
+POOLER_TENANT_ID=$POOLER_TENANT_ID
 
 # Supabase SMTP settings
 SMTP_ADMIN_EMAIL=$SMTP_ADMIN_EMAIL
@@ -187,6 +198,7 @@ echo "Supabase Dashboard credentials:"
 echo "Username: $DASHBOARD_USERNAME"
 echo "Password: $DASHBOARD_PASSWORD"
 echo "SMTP Password: $SMTP_PASS"
+echo "Pooler Tenant ID: $POOLER_TENANT_ID"
 
 # Save Passwords to File
 # Purpose: Store passwords for future reference
@@ -196,6 +208,7 @@ echo "OPENWEBUI_PASSWORD=\"$OPENWEBUI_PASSWORD\"" >> ./setup-files/passwords.txt
 echo "SUPABASE_DB_PASSWORD=\"$SUPABASE_DB_PASSWORD\"" >> ./setup-files/passwords.txt
 echo "DASHBOARD_PASSWORD=\"$DASHBOARD_PASSWORD\"" >> ./setup-files/passwords.txt
 echo "SMTP_PASS=\"$SMTP_PASS\"" >> ./setup-files/passwords.txt
+echo "POOLER_TENANT_ID=\"$POOLER_TENANT_ID\"" >> ./setup-files/passwords.txt
 
 echo "✅ Secret keys and passwords successfully generated"
 exit 0 

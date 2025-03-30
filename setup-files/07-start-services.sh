@@ -108,34 +108,7 @@ fi
 # Service Startup Sequence
 # Purpose: Start services in dependency order with health checks
 
-# 1. Start Supabase (Database and API)
-echo "Starting Supabase..."
-docker compose -f supabase-docker-compose.yaml up -d
-if [ $? -ne 0 ]; then
-  echo "❌ Failed to start Supabase"
-  exit 1
-fi
-check_service_health "Supabase" "http://localhost:5432/health"
-
-# 2. Start n8n (Workflow Automation)
-echo "Starting n8n..."
-docker compose -f n8n-docker-compose.yaml up -d
-if [ $? -ne 0 ]; then
-  echo "❌ Failed to start n8n"
-  exit 1
-fi
-check_service_health "n8n" "http://localhost:5678/healthz"
-
-# 3. Start Flowise (AI Workflow Builder)
-echo "Starting Flowise..."
-docker compose -f flowise-docker-compose.yaml up -d
-if [ $? -ne 0 ]; then
-  echo "❌ Failed to start Flowise"
-  exit 1
-fi
-check_service_health "Flowise" "http://localhost:3000/health"
-
-# 4. Start Ollama (LLM Server)
+# 1. Start Ollama (LLM Server)
 echo "Starting Ollama..."
 docker compose -f ollama-docker-compose.yaml up -d
 if [ $? -ne 0 ]; then
@@ -144,18 +117,68 @@ if [ $? -ne 0 ]; then
 fi
 check_service_health "Ollama" "http://localhost:11434/api/version"
 
-# 5. Start OpenWebUI (Ollama Interface)
+# 2. Start OpenWebUI (Ollama Interface)
 echo "Starting OpenWebUI..."
 docker compose -f openwebui-docker-compose.yaml up -d
 if [ $? -ne 0 ]; then
   echo "❌ Failed to start OpenWebUI"
   exit 1
 fi
-check_service_health "OpenWebUI" "http://localhost:8080/api/health"
+check_service_health "OpenWebUI" "http://localhost:8080/"
+
+# 3. Start Supabase (Database and API)
+echo "Starting Supabase..."
+docker compose -f supabase-docker-compose.yaml up -d
+if [ $? -ne 0 ]; then
+  echo "❌ Failed to start Supabase"
+  exit 1
+fi
+
+# Wait for Supabase services to be healthy
+echo "Waiting for Supabase services to be healthy..."
+check_service_health "Supabase DB" "http://localhost:5432/health"
+check_service_health "Supabase Auth" "http://localhost:9999/health"
+check_service_health "Supabase REST" "http://localhost:3000/"
+check_service_health "Supabase Realtime" "http://localhost:4000/health"
+check_service_health "Supabase Storage" "http://localhost:5000/health"
+check_service_health "Supabase Meta" "http://localhost:8080/health"
+check_service_health "Supabase Studio" "http://localhost:3000/api/health"
+
+# 4. Start n8n (Workflow Automation)
+echo "Starting n8n..."
+docker compose -f n8n-docker-compose.yaml up -d
+if [ $? -ne 0 ]; then
+  echo "❌ Failed to start n8n"
+  exit 1
+fi
+check_service_health "n8n" "http://localhost:5678/healthz"
+
+# 5. Start Flowise (AI Workflow Builder)
+echo "Starting Flowise..."
+docker compose -f flowise-docker-compose.yaml up -d
+if [ $? -ne 0 ]; then
+  echo "❌ Failed to start Flowise"
+  exit 1
+fi
+check_service_health "Flowise" "http://localhost:3000/health"
 
 # Final Status Check
 # Purpose: Verify all containers are running after startup
-containers=("n8n" "flowise" "ollama" "openwebui" "supabase-studio" "supabase-db")
+containers=(
+  "n8n"
+  "flowise"
+  "ollama"
+  "openwebui"
+  "supabase-studio"
+  "supabase-db"
+  "supabase-auth"
+  "supabase-rest"
+  "supabase-realtime"
+  "supabase-storage"
+  "supabase-meta"
+  "supabase-kong"
+)
+
 for container in "${containers[@]}"; do
   if ! check_container_running "$container"; then
     echo "❌ Container $container is not running"
