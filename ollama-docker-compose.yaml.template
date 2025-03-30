@@ -8,15 +8,40 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_MODELS=llama2,neural-chat,starling-lm
+      - OLLAMA_ORIGINS=*
+      - OLLAMA_SERVE=true
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ollama_data:/root/.ollama
+      - ./models:/models
     ports:
       - "11434:11434"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/version || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      sh -c "ollama serve &
+      sleep 5 &&
+      ollama pull llama2 &&
+      ollama pull neural-chat &&
+      ollama pull starling-lm &&
+      tail -f /dev/null"
 
 volumes:
   ollama_data:
+    name: ollama_data
 
 networks:
   app-network:

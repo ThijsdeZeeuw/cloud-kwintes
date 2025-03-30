@@ -10,10 +10,25 @@ services:
       - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY}
       - WEBUI_USERNAME=${OPENWEBUI_USERNAME}
       - WEBUI_PASSWORD=${OPENWEBUI_PASSWORD}
-    depends_on:
-      - ollama
+      - WEBUI_PORT=8080
+      - WEBUI_HOST=0.0.0.0
+      - WEBUI_DEBUG=false
+      - WEBUI_TITLE=OpenWebUI
+      - OLLAMA_HOST=ollama
+      - OLLAMA_PORT=11434
+      - OLLAMA_ORIGINS=*
+    ports:
+      - "8080:8080"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      ollama:
+        condition: service_healthy
 
 networks:
   app-network:
