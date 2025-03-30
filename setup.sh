@@ -21,7 +21,12 @@ show_progress() {
 # Function to validate domain name
 validate_domain() {
   local domain=$1
-  if [[ ! "$domain" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$ ]]; then
+  # Allow domain names with:
+  # - Letters, numbers, dots, and hyphens
+  # - Must start and end with a letter or number
+  # - Must have at least one dot
+  # - TLD must be at least 2 characters
+  if [[ ! "$domain" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$ ]]; then
     return 1
   fi
   return 0
