@@ -1,10 +1,16 @@
 #!/bin/bash
 
+# Directory Setup Script
+# Purpose: Creates necessary directories and users for running services
+# This script sets up the file structure and permissions for all services
+
 # Get variables from the main script via arguments
 USER_EMAIL=$1
 DOMAIN_NAME=$2
 GENERIC_TIMEZONE=$3
 
+# Validate required arguments
+# Purpose: Ensure all necessary information is provided
 if [ -z "$USER_EMAIL" ] || [ -z "$DOMAIN_NAME" ]; then
   echo "ERROR: Email or domain name not specified"
   echo "Usage: $0 user@example.com example.com [timezone]"
@@ -17,7 +23,8 @@ fi
 
 echo "Setting up directories and users..."
 
-# Creating n8n user if it doesn't exist
+# Create n8n User
+# Purpose: Set up a dedicated user for running services
 if ! id "n8n" &>/dev/null; then
   echo "Creating n8n user..."
   sudo adduser --disabled-password --gecos "" n8n
@@ -26,7 +33,8 @@ if ! id "n8n" &>/dev/null; then
     exit 1
   fi
   
-  # Generate random password
+  # Generate random password for n8n user
+  # Purpose: Set a secure password for the service user
   N8N_PASSWORD=$(openssl rand -base64 12)
   echo "n8n:$N8N_PASSWORD" | sudo chpasswd
   if [ $? -ne 0 ]; then
@@ -37,6 +45,8 @@ if ! id "n8n" &>/dev/null; then
   echo "✅ Created n8n user with password: $N8N_PASSWORD"
   echo "⚠️ IMPORTANT: Write down this password, you will need it for working with Docker!"
   
+  # Add n8n user to docker group
+  # Purpose: Allow n8n user to run Docker commands
   sudo usermod -aG docker n8n
   if [ $? -ne 0 ]; then
     echo "WARNING: Failed to add n8n user to docker group"
@@ -45,7 +55,8 @@ if ! id "n8n" &>/dev/null; then
 else
   echo "User n8n already exists"
   
-  # If user exists but password needs to be reset
+  # Optional password reset for existing user
+  # Purpose: Allow updating the password if needed
   read -p "Do you want to reset the password for n8n user? (y/n): " reset_password
   if [ "$reset_password" = "y" ]; then
     N8N_PASSWORD=$(openssl rand -base64 12)
@@ -59,7 +70,8 @@ else
   fi
 fi
 
-# Creating necessary directories
+# Create Service Directories
+# Purpose: Set up directories for each service's data and configuration
 echo "Creating directories..."
 sudo mkdir -p /opt/n8n
 if [ $? -ne 0 ]; then
@@ -97,7 +109,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Setting permissions
+# Set Directory Permissions
+# Purpose: Ensure n8n user has access to all service directories
 sudo chown -R n8n:n8n /opt/n8n
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to change owner of directory /opt/n8n"
@@ -128,7 +141,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Creating docker volumes
+# Create Docker Volumes
+# Purpose: Set up persistent storage for all services
 echo "Creating Docker volumes..."
 sudo docker volume create n8n_data
 if [ $? -ne 0 ]; then

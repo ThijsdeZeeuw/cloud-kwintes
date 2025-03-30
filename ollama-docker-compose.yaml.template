@@ -1,27 +1,48 @@
+# Ollama Docker Compose Configuration
+# Purpose: Sets up a local LLM server that can run various AI models
+# This configuration is optimized for VPS environments without GPU support
+
 version: '3'
 
 services:
   ollama:
+    # Main Ollama service configuration
+    # Purpose: Runs the Ollama server and manages AI models
     image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
+    
+    # Environment Variables
+    # Purpose: Configure Ollama server behavior and model settings
     environment:
-      - OLLAMA_HOST=0.0.0.0
-      - OLLAMA_MODELS=llama2,neural-chat,starling-lm
-      - OLLAMA_ORIGINS=*
-      - OLLAMA_SERVE=true
+      - OLLAMA_HOST=0.0.0.0  # Allow connections from any IP
+      - OLLAMA_MODELS=llama2,neural-chat,starling-lm  # Pre-download these models
+      - OLLAMA_ORIGINS=*  # Allow CORS from any origin
+      - OLLAMA_SERVE=true  # Enable the Ollama API server
+    
+    # Volume Mounts
+    # Purpose: Persist model data and allow custom model uploads
     volumes:
-      - ollama_data:/root/.ollama
-      - ./models:/models
+      - ollama_data:/root/.ollama  # Store downloaded models and settings
+      - ./models:/models  # Allow custom model uploads
+    
+    # Network Configuration
+    # Purpose: Expose Ollama API and connect to other services
     ports:
-      - "11434:11434"
+      - "11434:11434"  # Expose Ollama API port
     networks:
-      - app-network
+      - app-network  # Connect to shared application network
+    
+    # Health Check
+    # Purpose: Ensure the Ollama service is running and responding
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:11434/api/version || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+    
+    # Startup Command
+    # Purpose: Start Ollama server and pre-download required models
     command: >
       sh -c "ollama serve &
       sleep 5 &&
@@ -30,10 +51,14 @@ services:
       ollama pull starling-lm &&
       tail -f /dev/null"
 
+# Volume Definitions
+# Purpose: Define persistent storage for Ollama data
 volumes:
   ollama_data:
     name: ollama_data
 
+# Network Definitions
+# Purpose: Connect to the shared application network
 networks:
   app-network:
     external: true 

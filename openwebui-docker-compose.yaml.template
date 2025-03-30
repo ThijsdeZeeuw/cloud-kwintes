@@ -1,45 +1,70 @@
+# OpenWebUI Docker Compose Configuration
+# Purpose: Provides a web-based interface for interacting with Ollama
+# This configuration sets up a secure, user-authenticated interface for managing AI models
+
 version: '3'
 
 services:
   openwebui:
+    # Main OpenWebUI service configuration
+    # Purpose: Runs the web interface for Ollama
     image: ghcr.io/open-webui/open-webui:main
     container_name: openwebui
     restart: unless-stopped
+    
+    # Environment Variables
+    # Purpose: Configure OpenWebUI behavior, authentication, and Ollama connection
     environment:
-      - OLLAMA_API_BASE_URL=http://ollama:11434/api
-      - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY}
-      - WEBUI_USERNAME=${OPENWEBUI_USERNAME}
-      - WEBUI_PASSWORD=${OPENWEBUI_PASSWORD}
-      - WEBUI_PORT=8080
-      - WEBUI_HOST=0.0.0.0
-      - WEBUI_DEBUG=false
-      - WEBUI_TITLE=OpenWebUI
-      - OLLAMA_HOST=ollama
-      - OLLAMA_PORT=11434
-      - OLLAMA_ORIGINS=*
-      - WEBUI_SSL=false
-      - WEBUI_SSL_CERT=/etc/certs/cert.pem
-      - WEBUI_SSL_KEY=/etc/certs/key.pem
+      - OLLAMA_API_BASE_URL=http://ollama:11434/api  # URL to Ollama API
+      - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY}  # Security key for session management
+      - WEBUI_USERNAME=${OPENWEBUI_USERNAME}  # Admin username
+      - WEBUI_PASSWORD=${OPENWEBUI_PASSWORD}  # Admin password
+      - WEBUI_PORT=8080  # Port for the web interface
+      - WEBUI_HOST=0.0.0.0  # Listen on all network interfaces
+      - WEBUI_DEBUG=false  # Disable debug mode in production
+      - WEBUI_TITLE=OpenWebUI  # Custom title for the web interface
+      - OLLAMA_HOST=ollama  # Hostname of Ollama service
+      - OLLAMA_PORT=11434  # Port of Ollama service
+      - OLLAMA_ORIGINS=*  # Allow CORS from any origin
+      - WEBUI_SSL=false  # SSL is handled by reverse proxy
+      - WEBUI_SSL_CERT=/etc/certs/cert.pem  # SSL certificate path (if needed)
+      - WEBUI_SSL_KEY=/etc/certs/key.pem  # SSL key path (if needed)
+    
+    # Network Configuration
+    # Purpose: Expose web interface and connect to Ollama service
     ports:
-      - "8080:8080"
+      - "8080:8080"  # Expose web interface port
     networks:
-      - app-network
+      - app-network  # Connect to shared application network
+    
+    # Health Check
+    # Purpose: Ensure the web interface is running and responding
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 10s  # Allow extra time for initial startup
+    
+    # Service Dependencies
+    # Purpose: Ensure Ollama is running before starting OpenWebUI
     depends_on:
       ollama:
         condition: service_healthy
+    
+    # Volume Mounts
+    # Purpose: Persist user settings and chat history
     volumes:
-      - openwebui_data:/app/backend/data
+      - openwebui_data:/app/backend/data  # Store user data and settings
 
+# Volume Definitions
+# Purpose: Define persistent storage for OpenWebUI data
 volumes:
   openwebui_data:
     name: openwebui_data
 
+# Network Definitions
+# Purpose: Connect to the shared application network
 networks:
   app-network:
     external: true 

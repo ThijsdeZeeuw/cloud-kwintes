@@ -1,10 +1,16 @@
 #!/bin/bash
 
+# Secrets Generation Script
+# Purpose: Generates secure passwords and keys for all services
+# This script creates random credentials and saves them to .env file
+
 # Get variables from the main script via arguments
 USER_EMAIL=$1
 DOMAIN_NAME=$2
 GENERIC_TIMEZONE=$3
 
+# Validate required arguments
+# Purpose: Ensure all necessary information is provided
 if [ -z "$USER_EMAIL" ] || [ -z "$DOMAIN_NAME" ]; then
   echo "ERROR: Email or domain name not specified"
   echo "Usage: $0 user@example.com example.com [timezone]"
@@ -17,19 +23,20 @@ fi
 
 echo "Generating secret keys and passwords..."
 
-# Function to generate random strings
+# Random String Generation Functions
+# Purpose: Create cryptographically secure random strings for various uses
 generate_random_string() {
   length=$1
   cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$%^&*()-_=+' | fold -w ${length} | head -n 1
 }
 
-# Function to generate safe passwords (no special bash characters)
 generate_safe_password() {
   length=$1
   cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${length} | head -n 1
 }
 
-# Generating keys and passwords
+# Generate n8n Credentials
+# Purpose: Create encryption key and JWT secret for n8n
 N8N_ENCRYPTION_KEY=$(generate_random_string 40)
 if [ -z "$N8N_ENCRYPTION_KEY" ]; then
   echo "ERROR: Failed to generate encryption key for n8n"
@@ -42,7 +49,8 @@ if [ -z "$N8N_USER_MANAGEMENT_JWT_SECRET" ]; then
   exit 1
 fi
 
-# Use safer password generation function (alphanumeric only)
+# Generate Service Passwords
+# Purpose: Create secure passwords for all services
 N8N_PASSWORD=$(generate_safe_password 16)
 if [ -z "$N8N_PASSWORD" ]; then
   echo "ERROR: Failed to generate password for n8n"
@@ -55,7 +63,8 @@ if [ -z "$FLOWISE_PASSWORD" ]; then
   exit 1
 fi
 
-# Generate OpenWebUI credentials
+# Generate OpenWebUI Credentials
+# Purpose: Create secret key and admin credentials for OpenWebUI
 OPENWEBUI_SECRET_KEY=$(generate_random_string 32)
 if [ -z "$OPENWEBUI_SECRET_KEY" ]; then
   echo "ERROR: Failed to generate secret key for OpenWebUI"
@@ -69,7 +78,8 @@ if [ -z "$OPENWEBUI_PASSWORD" ]; then
   exit 1
 fi
 
-# Generate Supabase credentials
+# Generate Supabase Credentials
+# Purpose: Create database password and API keys for Supabase
 SUPABASE_DB_PASSWORD=$(generate_safe_password 16)
 if [ -z "$SUPABASE_DB_PASSWORD" ]; then
   echo "ERROR: Failed to generate password for Supabase DB"
@@ -94,7 +104,8 @@ if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
   exit 1
 fi
 
-# Generate Supabase dashboard credentials
+# Generate Supabase Dashboard Credentials
+# Purpose: Create admin credentials for Supabase Studio
 DASHBOARD_USERNAME="admin"
 DASHBOARD_PASSWORD=$(generate_safe_password 16)
 if [ -z "$DASHBOARD_PASSWORD" ]; then
@@ -102,7 +113,8 @@ if [ -z "$DASHBOARD_PASSWORD" ]; then
   exit 1
 fi
 
-# Generate SMTP credentials (using a default test configuration)
+# Generate SMTP Credentials
+# Purpose: Set up email configuration for Supabase
 SMTP_ADMIN_EMAIL="admin@${DOMAIN_NAME}"
 SMTP_HOST="smtp.${DOMAIN_NAME}"
 SMTP_PORT="587"
@@ -114,7 +126,8 @@ if [ -z "$SMTP_PASS" ]; then
 fi
 SMTP_SENDER_NAME="Supabase Admin"
 
-# Writing values to .env file
+# Create .env File
+# Purpose: Save all credentials to environment file
 cat > .env << EOL
 # Settings for n8n
 N8N_ENCRYPTION_KEY=$N8N_ENCRYPTION_KEY
@@ -163,6 +176,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Display Generated Credentials
+# Purpose: Show important credentials to the user
 echo "Secret keys generated and saved to .env file"
 echo "Password for n8n: $N8N_PASSWORD"
 echo "Password for Flowise: $FLOWISE_PASSWORD"
@@ -173,7 +188,8 @@ echo "Username: $DASHBOARD_USERNAME"
 echo "Password: $DASHBOARD_PASSWORD"
 echo "SMTP Password: $SMTP_PASS"
 
-# Save passwords for future use - using quotes to properly handle special characters
+# Save Passwords to File
+# Purpose: Store passwords for future reference
 echo "N8N_PASSWORD=\"$N8N_PASSWORD\"" > ./setup-files/passwords.txt
 echo "FLOWISE_PASSWORD=\"$FLOWISE_PASSWORD\"" >> ./setup-files/passwords.txt
 echo "OPENWEBUI_PASSWORD=\"$OPENWEBUI_PASSWORD\"" >> ./setup-files/passwords.txt

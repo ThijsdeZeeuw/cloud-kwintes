@@ -1,37 +1,44 @@
 #!/bin/bash
 
+# Firewall Setup Script
+# Purpose: Configures UFW (Uncomplicated Firewall) to allow necessary traffic
+# This script opens required ports for all services and enables the firewall
+
 echo "Setting up firewall..."
 
-# Check if ufw is installed
+# Check UFW Installation
+# Purpose: Verify if UFW is installed and install if needed
 if command -v ufw &> /dev/null; then
   echo "UFW is already installed, opening required ports..."
   
-  # Open ports
-  sudo ufw allow 80
+  # Open Required Ports
+  # Purpose: Allow traffic for web services, Ollama, and Supabase
+  sudo ufw allow 80  # HTTP
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 80"
     exit 1
   fi
   
-  sudo ufw allow 443
+  sudo ufw allow 443  # HTTPS
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 443"
     exit 1
   fi
 
-  sudo ufw allow 11434
+  sudo ufw allow 11434  # Ollama API
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 11434"
     exit 1
   fi
 
-  sudo ufw allow 5432
+  sudo ufw allow 5432  # Supabase Database
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 5432"
     exit 1
   fi
   
-  # Check if ufw is active
+  # Check Firewall Status
+  # Purpose: Ensure UFW is active
   sudo ufw status | grep -q "Status: active"
   if [ $? -ne 0 ]; then
     echo "UFW is not active, activating..."
@@ -44,6 +51,8 @@ if command -v ufw &> /dev/null; then
   
   echo "Ports 80, 443, 11434, and 5432 are open in the firewall"
 else
+  # Install UFW
+  # Purpose: Install UFW if not present
   echo "UFW is not installed. Installing..."
   sudo apt-get install -y ufw
   if [ $? -ne 0 ]; then
@@ -51,32 +60,34 @@ else
     exit 1
   fi
   
-  # Open ports
-  sudo ufw allow 80
+  # Open Required Ports
+  # Purpose: Allow traffic for all services
+  sudo ufw allow 80  # HTTP
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 80"
     exit 1
   fi
   
-  sudo ufw allow 443
+  sudo ufw allow 443  # HTTPS
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 443"
     exit 1
   fi
 
-  sudo ufw allow 11434
+  sudo ufw allow 11434  # Ollama API
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 11434"
     exit 1
   fi
 
-  sudo ufw allow 5432
+  sudo ufw allow 5432  # Supabase Database
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to open port 5432"
     exit 1
   fi
   
-  # Activate firewall
+  # Activate Firewall
+  # Purpose: Enable UFW and apply rules
   sudo ufw --force enable
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to activate UFW"
