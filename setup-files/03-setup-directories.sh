@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Get variables from the main script via arguments
+USER_EMAIL=$1
+DOMAIN_NAME=$2
+GENERIC_TIMEZONE=$3
+
+if [ -z "$USER_EMAIL" ] || [ -z "$DOMAIN_NAME" ]; then
+  echo "ERROR: Email or domain name not specified"
+  echo "Usage: $0 user@example.com example.com [timezone]"
+  exit 1
+fi
+
+if [ -z "$GENERIC_TIMEZONE" ]; then
+  GENERIC_TIMEZONE="UTC"
+fi
+
 echo "Setting up directories and users..."
 
 # Creating n8n user if it doesn't exist
@@ -136,6 +151,12 @@ fi
 sudo docker volume create supabase_data
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to create Docker volume supabase_data"
+  exit 1
+fi
+
+sudo docker volume create openwebui_data
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to create Docker volume openwebui_data"
   exit 1
 fi
 

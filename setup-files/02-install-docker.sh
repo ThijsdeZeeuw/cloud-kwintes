@@ -29,7 +29,15 @@ if ! [ -x "$(command -v docker)" ]; then
   fi
   
   # Install required packages
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y ca-certificates curl gnupg lsb-release $APT_OPTIONS
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    software-properties-common \
+    $APT_OPTIONS
+
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to install required packages"
     exit 1
@@ -68,7 +76,14 @@ if ! [ -x "$(command -v docker)" ]; then
   fi
   
   # Install Docker
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin $APT_OPTIONS
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin \
+    $APT_OPTIONS
+
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to install Docker"
     exit 1
@@ -80,6 +95,18 @@ if ! [ -x "$(command -v docker)" ]; then
     echo "WARNING: Failed to add user to the docker group. You may need root privileges to run docker."
   fi
   
+  # Start and enable Docker service
+  sudo systemctl start docker
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to start Docker service"
+    exit 1
+  fi
+  
+  sudo systemctl enable docker
+  if [ $? -ne 0 ]; then
+    echo "WARNING: Failed to enable Docker service"
+  fi
+  
   echo "Docker successfully installed"
 else
   echo "Docker is already installed"
@@ -89,6 +116,13 @@ fi
 docker --version
 if [ $? -ne 0 ]; then
   echo "ERROR: Docker is installed but not working correctly"
+  exit 1
+fi
+
+# Check if Docker Compose is working
+docker compose version
+if [ $? -ne 0 ]; then
+  echo "ERROR: Docker Compose is not working correctly"
   exit 1
 fi
 

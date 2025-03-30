@@ -76,6 +76,12 @@ if [ -z "$SUPABASE_DB_PASSWORD" ]; then
   exit 1
 fi
 
+SUPABASE_JWT_SECRET=$(generate_random_string 40)
+if [ -z "$SUPABASE_JWT_SECRET" ]; then
+  echo "ERROR: Failed to generate JWT secret for Supabase"
+  exit 1
+fi
+
 SUPABASE_ANON_KEY=$(generate_random_string 32)
 if [ -z "$SUPABASE_ANON_KEY" ]; then
   echo "ERROR: Failed to generate anon key for Supabase"
@@ -87,6 +93,26 @@ if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
   echo "ERROR: Failed to generate service role key for Supabase"
   exit 1
 fi
+
+# Generate Supabase dashboard credentials
+DASHBOARD_USERNAME="admin"
+DASHBOARD_PASSWORD=$(generate_safe_password 16)
+if [ -z "$DASHBOARD_PASSWORD" ]; then
+  echo "ERROR: Failed to generate password for Supabase dashboard"
+  exit 1
+fi
+
+# Generate SMTP credentials (using a default test configuration)
+SMTP_ADMIN_EMAIL="admin@${DOMAIN_NAME}"
+SMTP_HOST="smtp.${DOMAIN_NAME}"
+SMTP_PORT="587"
+SMTP_USER="smtp_user"
+SMTP_PASS=$(generate_safe_password 16)
+if [ -z "$SMTP_PASS" ]; then
+  echo "ERROR: Failed to generate SMTP password"
+  exit 1
+fi
+SMTP_SENDER_NAME="Supabase Admin"
 
 # Writing values to .env file
 cat > .env << EOL
@@ -111,8 +137,22 @@ OPENWEBUI_PASSWORD=$OPENWEBUI_PASSWORD
 
 # Settings for Supabase
 SUPABASE_DB_PASSWORD=$SUPABASE_DB_PASSWORD
+SUPABASE_JWT_SECRET=$SUPABASE_JWT_SECRET
 SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+DASHBOARD_USERNAME=$DASHBOARD_USERNAME
+DASHBOARD_PASSWORD=$DASHBOARD_PASSWORD
+
+# Supabase SMTP settings
+SMTP_ADMIN_EMAIL=$SMTP_ADMIN_EMAIL
+SMTP_HOST=$SMTP_HOST
+SMTP_PORT=$SMTP_PORT
+SMTP_USER=$SMTP_USER
+SMTP_PASS=$SMTP_PASS
+SMTP_SENDER_NAME=$SMTP_SENDER_NAME
+
+# Site URL for Supabase
+SITE_URL=https://supabase.${DOMAIN_NAME}
 
 # Domain settings
 DOMAIN_NAME=$DOMAIN_NAME
@@ -128,12 +168,18 @@ echo "Password for n8n: $N8N_PASSWORD"
 echo "Password for Flowise: $FLOWISE_PASSWORD"
 echo "Password for OpenWebUI: $OPENWEBUI_PASSWORD"
 echo "Password for Supabase DB: $SUPABASE_DB_PASSWORD"
+echo "Supabase Dashboard credentials:"
+echo "Username: $DASHBOARD_USERNAME"
+echo "Password: $DASHBOARD_PASSWORD"
+echo "SMTP Password: $SMTP_PASS"
 
 # Save passwords for future use - using quotes to properly handle special characters
 echo "N8N_PASSWORD=\"$N8N_PASSWORD\"" > ./setup-files/passwords.txt
 echo "FLOWISE_PASSWORD=\"$FLOWISE_PASSWORD\"" >> ./setup-files/passwords.txt
 echo "OPENWEBUI_PASSWORD=\"$OPENWEBUI_PASSWORD\"" >> ./setup-files/passwords.txt
 echo "SUPABASE_DB_PASSWORD=\"$SUPABASE_DB_PASSWORD\"" >> ./setup-files/passwords.txt
+echo "DASHBOARD_PASSWORD=\"$DASHBOARD_PASSWORD\"" >> ./setup-files/passwords.txt
+echo "SMTP_PASS=\"$SMTP_PASS\"" >> ./setup-files/passwords.txt
 
 echo "✅ Secret keys and passwords successfully generated"
 exit 0 

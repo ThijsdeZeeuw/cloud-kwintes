@@ -10,8 +10,6 @@ services:
       - OLLAMA_MODELS=llama2,neural-chat,starling-lm
       - OLLAMA_ORIGINS=*
       - OLLAMA_SERVE=true
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ollama_data:/root/.ollama
       - ./models:/models
@@ -24,13 +22,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     command: >
       sh -c "ollama serve &
       sleep 5 &&

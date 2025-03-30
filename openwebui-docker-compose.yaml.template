@@ -17,18 +17,28 @@ services:
       - OLLAMA_HOST=ollama
       - OLLAMA_PORT=11434
       - OLLAMA_ORIGINS=*
+      - WEBUI_SSL=false
+      - WEBUI_SSL_CERT=/etc/certs/cert.pem
+      - WEBUI_SSL_KEY=/etc/certs/key.pem
     ports:
       - "8080:8080"
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     depends_on:
       ollama:
         condition: service_healthy
+    volumes:
+      - openwebui_data:/app/backend/data
+
+volumes:
+  openwebui_data:
+    name: openwebui_data
 
 networks:
   app-network:
