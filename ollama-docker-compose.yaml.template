@@ -2,59 +2,32 @@
 # Purpose: Sets up a local LLM server that can run various AI models
 # This configuration is optimized for VPS environments without GPU support
 
-version: '3'
-
 services:
   ollama:
-    # Main Ollama service configuration
-    # Purpose: Runs the Ollama server and manages AI models
     image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
-    
-    # Environment Variables
-    # Purpose: Configure Ollama server behavior and model settings
     environment:
-      - OLLAMA_HOST=0.0.0.0  # Allow connections from any IP
-      - OLLAMA_MODELS=llama2,neural-chat,starling-lm  # Pre-download these models
-      - OLLAMA_ORIGINS=*  # Allow CORS from any origin
-      - OLLAMA_SERVE=true  # Enable the Ollama API server
-    
-    # Volume Mounts
-    # Purpose: Persist model data and allow custom model uploads
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_MODELS=exaone-deep:2.4b,gemma3:1b,granite3.2-vision:2b,granite-embedding:30m,granite-embedding:280m
     volumes:
-      - ollama_data:/root/.ollama  # Store downloaded models and settings
-      - ./models:/models:ro  # Allow custom model uploads (read-only)
-    
-    # Network Configuration
-    # Purpose: Expose Ollama API and connect to other services
+      - ollama_data:/root/.ollama
     ports:
-      - "11434:11434"  # Expose Ollama API port
+      - "11434:11434"
     networks:
-      - app-network  # Connect to shared application network
-    
-    # Health Check
-    # Purpose: Ensure the Ollama service is running and responding
+      - app-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/version || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s  # Allow extra time for initial startup
-    
-    # Startup Command
-    # Purpose: Start Ollama server and pre-download required models
-    command: >
-      sh -c "mkdir -p /root/.ollama && ollama serve"
+      start_period: 30s
 
-# Volume Definitions
-# Purpose: Define persistent storage for Ollama data
 volumes:
   ollama_data:
     name: ollama_data
+    external: true
 
-# Network Definitions
-# Purpose: Connect to the shared application network
 networks:
   app-network:
     external: true 

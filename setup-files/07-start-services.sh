@@ -116,10 +116,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Wait for Ollama to be healthy with increased start period
+# Wait for Ollama to be healthy
 echo "Waiting for Ollama to be healthy..."
-sleep 30  # Give Ollama more time to initialize
-check_service_health "Ollama" "http://localhost:11434/api/health"
+sleep 30  # Give Ollama time to initialize
+check_service_health "Ollama" "http://localhost:11434/api/version"
 
 # 2. Start OpenWebUI (Ollama Interface)
 echo "Starting OpenWebUI..."
